@@ -106,6 +106,33 @@
             box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
         }
 
+        .http-request {
+            margin: 15px 0;
+            padding: 12px;
+            background: #e8f5e8;
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .request-header {
+            font-weight: 600;
+            color: #2e7d32;
+            margin-bottom: 8px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .request-url {
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #c8e6c9;
+            word-break: break-all;
+            color: #1b5e20;
+        }
+
         .status {
             margin-top: 20px;
             padding: 15px;
@@ -163,19 +190,27 @@
             color: #6c757d;
         }
 
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #4CAF50;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .test-btn {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .test-btn:hover {
+            background: #f57c00;
+        }
+
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -227,6 +262,11 @@
                 </button>
             </div>
 
+            <div id="httpRequest" class="http-request">
+                <div class="request-header">🌐 Requête HTTP envoyée :</div>
+                <div id="requestUrl" class="request-url"></div>
+            </div>
+
             <div id="statusMessage" class="status"></div>
             <div id="infoPanel" class="info-panel"></div>
         </div>
@@ -252,6 +292,12 @@
             
             const url = `http://${ip}/control?cmd=TaskValueSet,${task},${relay},${value}`;
             
+            // Affichage de la requête HTTP
+            const httpRequestDiv = document.getElementById('httpRequest');
+            const requestUrlDiv = document.getElementById('requestUrl');
+            requestUrlDiv.textContent = url;
+            httpRequestDiv.style.display = 'block';
+            
             showStatus('🔄 Envoi de la commande...', 'info');
             
             // Utilisation d'une image pour contourner les restrictions CORS
@@ -259,6 +305,13 @@
             img.onload = () => {
                 const action = value === '1' ? 'activé' : 'désactivé';
                 showStatus(`✅ Relais ${relay} ${action} avec succès!`, 'success');
+                
+                // Mise à jour de la dernière commande
+                const lastCommandElement = document.getElementById('lastCommand');
+                if (lastCommandElement) {
+                    const now = new Date().toLocaleTimeString();
+                    lastCommandElement.textContent = `TaskValueSet,${task},${relay},${value} (${now})`;
+                }
             };
             img.onerror = () => {
                 showStatus('❌ Erreur lors de l\'envoi de la commande', 'error');
@@ -266,89 +319,74 @@
             img.src = url;
         }
 
-        async function getModuleInfo() {
+        function getModuleInfo() {
             const ip = document.getElementById('moduleSelect').value;
             const infoPanel = document.getElementById('infoPanel');
+            const moduleName = document.getElementById('moduleSelect').selectedOptions[0].text.split(' (')[0];
             
-            showStatus('🔄 Récupération des informations...', 'info');
+            showStatus('📡 Affichage des informations du module...', 'info');
             
-            try {
-                // Tentative de récupération des informations JSON
-                const response = await fetch(`http://${ip}/json`);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    displayModuleInfo(data);
-                } else {
-                    throw new Error('Impossible de récupérer les données');
-                }
-            } catch (error) {
-                // Fallback: affichage d'informations basiques
-                infoPanel.innerHTML = `
-                    <h3>📡 Informations Module</h3>
-                    <div class="info-item">
-                        <span class="info-label">Adresse IP:</span>
-                        <span class="info-value">${ip}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Statut:</span>
-                        <span class="info-value">Module détecté</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Note:</span>
-                        <span class="info-value">Informations détaillées non disponibles (CORS)</span>
-                    </div>
-                `;
-                infoPanel.style.display = 'block';
-                showStatus('⚠️ Informations limitées disponibles', 'info');
-            }
+            // Affichage d'informations utiles sans appel CORS
+            infoPanel.innerHTML = `
+                <h3>📡 Informations Module</h3>
+                <div class="info-item">
+                    <span class="info-label">Nom:</span>
+                    <span class="info-value">${moduleName}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Adresse IP:</span>
+                    <span class="info-value">${ip}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Tasks:</span>
+                    <span class="info-value">
+                        <div style="font-size: 0.8rem; margin-top: 5px;">
+                            1:relay:Relay0,Relay1,Relay2,Relay3<br>
+                            2:variables:Tps_dist,Coef_prem,Num_relay<br>
+                            <em style="color: #888;">Cliquez sur "🔍 Tester" pour vérifier les valeurs actuelles</em>
+                        </div>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Interface web:</span>
+                    <span class="info-value"><a href="http://${ip}" target="_blank">🌐 Ouvrir ESPEasy →</a></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">JSON API:</span>
+                    <span class="info-value"><a href="http://${ip}/json" target="_blank">📊 Voir données JSON →</a></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Control API:</span>
+                    <span class="info-value">http://${ip}/control?cmd=</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Dernière commande:</span>
+                    <span class="info-value" id="lastCommand">Aucune</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Test connectivité:</span>
+                    <span class="info-value">
+                        <button class="test-btn" onclick="testConnectivity('${ip}')">
+                            🔍 Tester
+                        </button>
+                    </span>
+                </div>
+            `;
+            infoPanel.style.display = 'block';
+            showStatus('✅ Informations affichées avec liens utiles', 'success');
         }
 
-        function displayModuleInfo(data) {
-            const infoPanel = document.getElementById('infoPanel');
+        function testConnectivity(ip) {
+            showStatus('🔍 Test de connectivité...', 'info');
             
-            let infoHtml = '<h3>📡 Informations Module</h3>';
-            
-            if (data.System) {
-                infoHtml += `
-                    <div class="info-item">
-                        <span class="info-label">Nom:</span>
-                        <span class="info-value">${data.System.Name || 'N/A'}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Version:</span>
-                        <span class="info-value">${data.System.Build || 'N/A'}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Uptime:</span>
-                        <span class="info-value">${data.System.Uptime || 'N/A'}</span>
-                    </div>
-                `;
-            }
-            
-            if (data.WiFi) {
-                infoHtml += `
-                    <div class="info-item">
-                        <span class="info-label">WiFi RSSI:</span>
-                        <span class="info-value">${data.WiFi.RSSI || 'N/A'} dBm</span>
-                    </div>
-                `;
-            }
-            
-            if (data.Sensors) {
-                data.Sensors.forEach((sensor, index) => {
-                    infoHtml += `
-                        <div class="info-item">
-                            <span class="info-label">Task ${sensor.TaskNumber}:</span>
-                            <span class="info-value">${sensor.TaskName || `Sensor ${index + 1}`}</span>
-                        </div>
-                    `;
-                });
-            }
-            
-            infoPanel.innerHTML = infoHtml;
-            infoPanel.style.display = 'block';
-            showStatus('✅ Informations récupérées!', 'success');
+            const img = new Image();
+            img.onload = () => {
+                showStatus('✅ Module accessible !', 'success');
+            };
+            img.onerror = () => {
+                showStatus('❌ Module non accessible', 'error');
+            };
+            img.src = `http://${ip}/favicon.ico?t=${Date.now()}`;
         }
 
         // Initialisation
