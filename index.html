@@ -3,396 +3,836 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contrôleur ESPEasy</title>
+    <title>Distributeur Automatique de Graines V1.0</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
+        
         .container {
-            max-width: 400px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-
+        
         .header {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
             color: white;
-            padding: 20px;
+            padding: 30px;
             text-align: center;
         }
-
+        
         .header h1 {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
+            font-size: 28px;
+            margin-bottom: 10px;
         }
-
-        .form-container {
-            padding: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-            font-size: 0.9rem;
-        }
-
-        select, input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e1e1;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        select:focus, input:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin: 25px 0;
-        }
-
-        button {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(45deg, #2196F3, #1976D2);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
-        }
-
-        .http-request {
-            margin: 15px 0;
-            padding: 12px;
-            background: #e8f5e8;
-            border: 1px solid #4CAF50;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-            display: none;
-        }
-
-        .request-header {
-            font-weight: 600;
-            color: #2e7d32;
-            margin-bottom: 8px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        .request-url {
-            background: white;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #c8e6c9;
-            word-break: break-all;
-            color: #1b5e20;
-        }
-
+        
         .status {
-            margin-top: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 15px;
+        }
+        
+        .live-info {
+            background: rgba(255,255,255,0.15);
             padding: 15px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            display: none;
+            border-radius: 15px;
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            font-size: 14px;
         }
-
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .status.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-        .info-panel {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            display: none;
-        }
-
+        
         .info-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e9ecef;
+            text-align: center;
         }
-
-        .info-item:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-
-        .info-label {
-            font-weight: 600;
-            color: #495057;
-        }
-
+        
         .info-value {
-            color: #6c757d;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 5px;
         }
-
-        .test-btn {
-            background: #ff9800;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #00b894;
+        }
+        
+        .section h2 {
+            color: #2d3436;
+            font-size: 22px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section h2::before {
+            content: "ðŸ”";
+            margin-right: 10px;
+            font-size: 24px;
+        }
+        
+        .section:nth-child(2) h2::before { content: "ðŸŒ¾"; }
+        .section:nth-child(3) h2::before { content: "ðŸ“Š"; }
+        .section:nth-child(4) h2::before { content: "â„ï¸"; }
+        .section:nth-child(5) h2::before { content: "ðŸ“Š"; }
+        .section:nth-child(6) h2::before { content: "â„¹ï¸"; }
+        .section:nth-child(7) h2::before { content: "ðŸ”§"; }
+        
+        .collapsible {
             cursor: pointer;
-            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-
-        .test-btn:hover {
-            background: #f57c00;
+        
+        .collapsible::after {
+            content: "â–¼";
+            transition: transform 0.3s ease;
         }
-
-        a {
-            color: #4CAF50;
+        
+        .collapsible.active::after {
+            transform: rotate(180deg);
+        }
+        
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .collapsible-content.active {
+            max-height: 1000px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            color: #636e72;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input, select {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #00b894;
+            box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.1);
+        }
+        
+        .summary {
+            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .summary-result {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
             text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #fdcb6e 0%, #f39c12 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .info-links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .info-link {
+            background: #e8f4f8;
+            border: 2px solid #74b9ff;
+            border-radius: 10px;
+            padding: 15px;
+            text-decoration: none;
+            color: #2d3436;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .info-link:hover {
+            background: #74b9ff;
+            color: white;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #636e72;
+        }
+        
+        .error {
+            background: #ff7675;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            background: #00b894;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
         }
 
-        a:hover {
-            text-decoration: underline;
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            .live-info {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        async function clearLogs() {
+            if (confirm('ÃŠtes-vous sÃ»r de vouloir redÃ©marrer l\'ESP32 ?')) {
+                try {
+                    const response = await fetch(`http://${ESP_IP}/control?cmd=reboot`);
+                    if (response.ok) {
+                        showSuccess('ESP32 redÃ©marrÃ©');
+                        setTimeout(() => {
+                            showSuccess('ESP32 en cours de redÃ©marrage...');
+                        }, 1000);
+                    }
+                } catch (error) {
+                    showError('Erreur lors du redÃ©marrage: ' + error.message);
+                }
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔌 Contrôleur ESPEasy</h1>
-            <p>Pilotage de relais à distance</p>
+            <h1>ðŸ” Distributeur Automatique de Graines</h1>
+            <div class="status" id="status">ESP32 @ 192.168.0.72</div>
+            <div class="live-info">
+                <div class="info-item">
+                    <div>ðŸŒ¡ï¸ TempÃ©rature actuelle</div>
+                    <div class="info-value" id="currentTemp">--Â°C</div>
+                </div>
+                <div class="info-item">
+                    <div>ðŸ½ï¸ Repas distribuÃ©s aujourd'hui</div>
+                    <div class="info-value" id="mealsCount">-- / --</div>
+                </div>
+            </div>
         </div>
-
-        <div class="form-container">
-            <div class="form-group">
-                <label for="moduleSelect">Module ESPEasy :</label>
-                <select id="moduleSelect">
-                    <option value="192.168.0.75">Poulailler (192.168.0.75)</option>
-                    <option value="192.168.0.78">Cabane (192.168.0.78)</option>
-                </select>
+        
+        <div class="content">
+            <div id="loading" class="loading">
+                <p>Chargement des paramÃ¨tres depuis l'ESP32...</p>
             </div>
+            
+            <div id="error" class="error" style="display: none;"></div>
+            <div id="success" class="success" style="display: none;"></div>
+            
+            <form id="configForm" style="display: none;">
+                <!-- Section Cheptel -->
+                <div class="section">
+                    <h2>Cheptel</h2>
+                    <div class="form-group">
+                        <label for="np">Nombre de poules</label>
+                        <input type="number" id="np" name="np" min="1" max="30" step="1" value="5">
+                    </div>
+                </div>
+                
+                <!-- Section Distribution -->
+                <div class="section">
+                    <h2>Distribution</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="heurePrem">Heure premiÃ¨re distribution</label>
+                            <select id="heurePrem" name="heurePrem">
+                                <option value="6">6h00</option>
+                                <option value="7">7h00</option>
+                                <option value="8">8h00</option>
+                                <option value="9" selected>9h00</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="heureDer">Heure derniÃ¨re distribution</label>
+                            <select id="heureDer" name="heureDer">
+                                <option value="15" selected>15h00</option>
+                                <option value="16">16h00</option>
+                                <option value="17">17h00</option>
+                                <option value="18">18h00</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tpDist">Temps de distribution (secondes)</label>
+                            <select id="tpDist" name="tpDist">
+                                <option value="10">10s</option>
+                                <option value="30">30s</option>
+                                <option value="60" selected>60s</option>
+                                <option value="90">90s</option>
+                                <option value="120">120s</option>
+                                <option value="150">150s</option>
+                                <option value="180">180s</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coeffPrem">Coefficient premiÃ¨re distribution</label>
+                            <select id="coeffPrem" name="coeffPrem">
+                                <option value="3">3x</option>
+                                <option value="4">4x</option>
+                                <option value="5" selected>5x</option>
+                                <option value="6">6x</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="nbDist">Nombre de repas par jour</label>
+                            <select id="nbDist" name="nbDist">
+                                <option value="2">2 repas</option>
+                                <option value="3" selected>3 repas</option>
+                                <option value="4">4 repas</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section RÃ©sumÃ© Distribution -->
+                <div class="section">
+                    <h2>RÃ©sumÃ© Distribution</h2>
+                    <div class="summary">
+                        <div>Temps total de distribution par jour :</div>
+                        <div class="summary-result" id="tempsTotal">0 secondes</div>
+                        <div style="font-size: 14px; margin-top: 10px; opacity: 0.9;">
+                            Formule : (Nb poules) Ã— (Temps Ã— Nb repas + Coefficient - 1)
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section Gestion hors gel -->
+                <div class="section">
+                    <h2>Gestion hors gel</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="consigne">TempÃ©rature minimale (Â°C)</label>
+                            <select id="consigne" name="consigne">
+                                <option value="-1">-1Â°C</option>
+                                <option value="0" selected>0Â°C</option>
+                                <option value="1">1Â°C</option>
+                                <option value="2">2Â°C</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="delta">Delta (Â°C)</label>
+                            <select id="delta" name="delta">
+                                <option value="1">1Â°C</option>
+                                <option value="2" selected>2Â°C</option>
+                                <option value="3">3Â°C</option>
+                                <option value="4">4Â°C</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section RÃ©sumÃ© Chauffage -->
+                <div class="section">
+                    <h2>RÃ©sumÃ© Chauffage</h2>
+                    <div class="summary">
+                        <div id="resumeChauffage">
+                            La rÃ©sistance s'allumera si la tempÃ©rature passe sous 0Â° et s'arrÃªtera quand elle dÃ©passera 2Â°.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section Info -->
+                <div class="section">
+                    <h2>Informations</h2>
+                    <div class="info-links">
+                        <a href="http://192.168.0.72/json" target="_blank" class="info-link">
+                            <span>ðŸ“Š Valeurs JSON des paramÃ¨tres</span>
+                            <span>â†’</span>
+                        </a>
+                        <a href="http://192.168.0.72" target="_blank" class="info-link">
+                            <span>ðŸŒ Interface web ESPEasy</span>
+                            <span>â†’</span>
+                        </a>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label for="taskNumber">Numéro de Task :</label>
-                <input type="number" id="taskNumber" value="1" min="1" max="12">
-            </div>
-
-            <div class="form-group">
-                <label for="relayNumber">Numéro de Relais :</label>
-                <select id="relayNumber">
-                    <option value="1">Relais 1</option>
-                    <option value="2">Relais 2</option>
-                    <option value="3">Relais 3</option>
-                    <option value="4">Relais 4</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="relayValue">Action :</label>
-                <select id="relayValue">
-                    <option value="1">ON (Activer)</option>
-                    <option value="0">OFF (Désactiver)</option>
-                </select>
-            </div>
-
-            <div class="button-group">
-                <button class="btn-primary" onclick="sendCommand()">
-                    🚀 Envoyer Commande
-                </button>
-                <button class="btn-secondary" onclick="getModuleInfo()">
-                    📊 Info Module
-                </button>
-            </div>
-
-            <div id="httpRequest" class="http-request">
-                <div class="request-header">🌐 Requête HTTP envoyée :</div>
-                <div id="requestUrl" class="request-url"></div>
-            </div>
-
-            <div id="statusMessage" class="status"></div>
-            <div id="infoPanel" class="info-panel"></div>
+                <!-- Section Tests Manuels -->
+                <div class="section">
+                    <h2 class="collapsible" onclick="toggleCollapse(this)">Tests Manuels</h2>
+                    <div class="collapsible-content">
+                        <div class="form-grid" style="margin-top: 20px;">
+                            <div class="form-group">
+                                <label>R1 - Distribution (GPIO14)</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="button" class="btn btn-primary" onclick="testRelay(14, 1)" style="flex: 1;">ON</button>
+                                    <button type="button" class="btn btn-secondary" onclick="testRelay(14, 0)" style="flex: 1;">OFF</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>R2 - Chauffage (GPIO13)</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="button" class="btn btn-primary" onclick="testRelay(13, 1)" style="flex: 1;">ON</button>
+                                    <button type="button" class="btn btn-secondary" onclick="testRelay(13, 0)" style="flex: 1;">OFF</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>R3 - Libre (GPIO0)</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="button" class="btn btn-primary" onclick="testRelay(0, 1)" style="flex: 1;">ON</button>
+                                    <button type="button" class="btn btn-secondary" onclick="testRelay(0, 0)" style="flex: 1;">OFF</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>R4 - Libre (GPIO2)</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="button" class="btn btn-primary" onclick="testRelay(2, 1)" style="flex: 1;">ON</button>
+                                    <button type="button" class="btn btn-secondary" onclick="testRelay(2, 0)" style="flex: 1;">OFF</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                            <strong>âš ï¸ Attention :</strong> GPIO0 et GPIO2 sont sensibles au boot. En cas de problÃ¨me de dÃ©marrage, dÃ©branchez R3 et R4 temporairement.
+                        </div>
+                        <div style="margin-top: 10px; padding: 10px; background: #d1ecf1; border-radius: 8px; border-left: 4px solid #bee5eb;">
+                            <strong>â„¹ï¸ Tests Automatiques :</strong>
+                            <div style="margin-top: 8px;">
+                                <button type="button" onclick="testDistribution()" style="display: inline-block; margin: 2px 5px; padding: 5px 10px; background: #007bff; color: white; border: none; text-decoration: none; border-radius: 4px; font-size: 12px; cursor: pointer;">Test Distribution 5s</button>
+                                <button type="button" onclick="testChauffage()" style="display: inline-block; margin: 2px 5px; padding: 5px 10px; background: #dc3545; color: white; border: none; text-decoration: none; border-radius: 4px; font-size: 12px; cursor: pointer;">Test Chauffage 10s</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="buttons">
+                    <button type="button" class="btn btn-secondary" onclick="loadFromESP()">
+                        ðŸ”„ Recharger depuis ESP32
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveToESP()">
+                        ðŸ’¾ Sauvegarder vers ESP32
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="resetDefaults()">
+                        âš™ï¸ Valeurs par dÃ©faut
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        function showStatus(message, type = 'info') {
-            const statusDiv = document.getElementById('statusMessage');
-            statusDiv.textContent = message;
-            statusDiv.className = `status ${type}`;
-            statusDiv.style.display = 'block';
-            
+        const ESP_IP = '192.168.0.72';
+        
+        // Variables par dÃ©faut
+        const defaults = {
+            np: 5,
+            heurePrem: 9,
+            heureDer: 15,
+            tpDist: 60,
+            coeffPrem: 5,
+            nbDist: 3,
+            consigne: 0,
+            delta: 2
+        };
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
             setTimeout(() => {
-                statusDiv.style.display = 'none';
+                errorDiv.style.display = 'none';
             }, 5000);
         }
-
-        function sendCommand() {
-            const ip = document.getElementById('moduleSelect').value;
-            const task = document.getElementById('taskNumber').value;
-            const relay = document.getElementById('relayNumber').value;
-            const value = document.getElementById('relayValue').value;
+        
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        function toggleCollapse(element) {
+            element.classList.toggle('active');
+            const content = element.nextElementSibling;
+            content.classList.toggle('active');
+        }
+        
+        function updateCalculations() {
+            // Calcul temps total distribution
+            const np = parseInt(document.getElementById('np').value);
+            const tpDist = parseInt(document.getElementById('tpDist').value);
+            const nbDist = parseInt(document.getElementById('nbDist').value);
+            const coeffPrem = parseInt(document.getElementById('coeffPrem').value);
             
-            const url = `http://${ip}/control?cmd=TaskValueSet,${task},${relay},${value}`;
+            const tempsTotal = np * (tpDist * nbDist + coeffPrem - 1);
+            document.getElementById('tempsTotal').textContent = `${tempsTotal} secondes`;
             
-            // Affichage de la requête HTTP
-            const httpRequestDiv = document.getElementById('httpRequest');
-            const requestUrlDiv = document.getElementById('requestUrl');
-            requestUrlDiv.textContent = url;
-            httpRequestDiv.style.display = 'block';
+            // RÃ©sumÃ© chauffage
+            const consigne = parseInt(document.getElementById('consigne').value);
+            const delta = parseInt(document.getElementById('delta').value);
+            document.getElementById('resumeChauffage').textContent = 
+                `La rÃ©sistance s'allumera si la tempÃ©rature passe sous ${consigne}Â° et s'arrÃªtera quand elle dÃ©passera ${consigne + delta}Â°.`;
+        }
+        
+        function updateLiveInfo(data) {
+            // Mettre Ã  jour la tempÃ©rature - Structure ESPEasy correcte
+            let tempFound = false;
             
-            showStatus('🔄 Envoi de la commande...', 'info');
-            
-            // Utilisation d'une image pour contourner les restrictions CORS
-            const img = new Image();
-            img.onload = () => {
-                const action = value === '1' ? 'activé' : 'désactivé';
-                showStatus(`✅ Relais ${relay} ${action} avec succès!`, 'success');
-                
-                // Mise à jour de la dernière commande
-                const lastCommandElement = document.getElementById('lastCommand');
-                if (lastCommandElement) {
-                    const now = new Date().toLocaleTimeString();
-                    lastCommandElement.textContent = `TaskValueSet,${task},${relay},${value} (${now})`;
+            // Nouvelle structure : data.Sensors[].TaskValues[].Value
+            if (data.Sensors && data.Sensors.length > 0) {
+                for (let sensor of data.Sensors) {
+                    if (sensor.TaskValues && sensor.TaskValues.length > 0) {
+                        for (let taskValue of sensor.TaskValues) {
+                            // Chercher la valeur "temperature" (minuscule)
+                            if (taskValue.Name && taskValue.Name.toLowerCase() === 'temperature' 
+                                && taskValue.Value !== undefined) {
+                                
+                                document.getElementById('currentTemp').textContent = `${taskValue.Value.toFixed(1)}Â°C`;
+                                tempFound = true;
+                                break;
+                            }
+                        }
+                        if (tempFound) break;
+                    }
                 }
-            };
-            img.onerror = () => {
-                showStatus('❌ Erreur lors de l\'envoi de la commande', 'error');
-            };
-            img.src = url;
-        }
-
-        function getModuleInfo() {
-            const ip = document.getElementById('moduleSelect').value;
-            const infoPanel = document.getElementById('infoPanel');
-            const moduleName = document.getElementById('moduleSelect').selectedOptions[0].text.split(' (')[0];
+            }
             
-            showStatus('📡 Affichage des informations du module...', 'info');
+            // Fallback : ancienne structure TaskValues (au cas oÃ¹)
+            if (!tempFound && data.TaskValues && data.TaskValues.length > 0) {
+                for (let task of data.TaskValues) {
+                    const taskName = task.TaskName ? task.TaskName.toLowerCase() : '';
+                    
+                    if ((taskName.includes('temp') || taskName === 'temperature') 
+                        && task.Values && task.Values.length > 0) {
+                        
+                        document.getElementById('currentTemp').textContent = `${task.Values[0].toFixed(1)}Â°C`;
+                        tempFound = true;
+                        break;
+                    }
+                }
+            }
             
-            // Affichage d'informations utiles sans appel CORS
-            infoPanel.innerHTML = `
-                <h3>📡 Informations Module</h3>
-                <div class="info-item">
-                    <span class="info-label">Nom:</span>
-                    <span class="info-value">${moduleName}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Adresse IP:</span>
-                    <span class="info-value">${ip}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Tasks:</span>
-                    <span class="info-value">
-                        <div style="font-size: 0.8rem; margin-top: 5px;">
-                            1:relay:Relay0,Relay1,Relay2,Relay3<br>
-                            2:variables:Tps_dist,Coef_prem,Num_relay<br>
-                            <em style="color: #888;">Cliquez sur "🔍 Tester" pour vérifier les valeurs actuelles</em>
-                        </div>
-                    </span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Interface web:</span>
-                    <span class="info-value"><a href="http://${ip}" target="_blank">🌐 Ouvrir ESPEasy →</a></span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">JSON API:</span>
-                    <span class="info-value"><a href="http://${ip}/json" target="_blank">📊 Voir données JSON →</a></span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Control API:</span>
-                    <span class="info-value">http://${ip}/control?cmd=</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Dernière commande:</span>
-                    <span class="info-value" id="lastCommand">Aucune</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Test connectivité:</span>
-                    <span class="info-value">
-                        <button class="test-btn" onclick="testConnectivity('${ip}')">
-                            🔍 Tester
-                        </button>
-                    </span>
-                </div>
-            `;
-            infoPanel.style.display = 'block';
-            showStatus('✅ Informations affichées avec liens utiles', 'success');
-        }
-
-        function testConnectivity(ip) {
-            showStatus('🔍 Test de connectivité...', 'info');
+            // Debug si tempÃ©rature non trouvÃ©e
+            if (!tempFound) {
+                console.log('TempÃ©rature non trouvÃ©e dans:', data);
+                document.getElementById('currentTemp').textContent = '--Â°C';
+            }
             
-            const img = new Image();
-            img.onload = () => {
-                showStatus('✅ Module accessible !', 'success');
-            };
-            img.onerror = () => {
-                showStatus('❌ Module non accessible', 'error');
-            };
-            img.src = `http://${ip}/favicon.ico?t=${Date.now()}`;
+            // Mettre Ã  jour le compteur de repas depuis Dummy Device Systeme
+            if (data.Sensors && data.Sensors.length > 0) {
+                for (let sensor of data.Sensors) {
+                    if (sensor.TaskName === 'Systeme' && sensor.TaskValues) {
+                        let compteur = 0, total = 3;
+                        for (let val of sensor.TaskValues) {
+                            if (val.Name === 'COMPTEUR_REPAS') compteur = val.Value;
+                        }
+                        // RÃ©cupÃ©rer le total depuis Distribution
+                        for (let s of data.Sensors) {
+                            if (s.TaskName === 'Distribution' && s.TaskValues) {
+                                for (let v of s.TaskValues) {
+                                    if (v.Name === 'NB_DIST') total = v.Value;
+                                }
+                            }
+                        }
+                        document.getElementById('mealsCount').textContent = `${compteur} / ${total}`;
+                        break;
+                    }
+                }
+            }
         }
-
-        // Initialisation
+        
+        async function clearLogs() {
+            if (confirm('ÃŠtes-vous sÃ»r de vouloir redÃ©marrer l\'ESP32 ?')) {
+                try {
+                    const response = await fetch(`http://${ESP_IP}/control?cmd=reboot`);
+                    if (response.ok) {
+                        showSuccess('ESP32 redÃ©marrÃ©');
+                        setTimeout(() => {
+                            showSuccess('ESP32 en cours de redÃ©marrage...');
+                        }, 1000);
+                    }
+                } catch (error) {
+                    showError('Erreur lors du redÃ©marrage: ' + error.message);
+                }
+            }
+        }
+        
+        // Ajouter listeners pour recalcul automatique
         document.addEventListener('DOMContentLoaded', function() {
-            showStatus('📱 Interface prête à l\'utilisation', 'success');
+            const inputs = ['np', 'tpDist', 'nbDist', 'coeffPrem', 'consigne', 'delta'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('change', updateCalculations);
+            });
+            
+            // RafraÃ®chir les infos toutes les 10 secondes
+            setInterval(refreshLiveInfo, 10000);
         });
+        
+        async function refreshLiveInfo() {
+            try {
+                const response = await fetch(`http://${ESP_IP}/json`);
+                if (response.ok) {
+                    const data = await response.json();
+                    updateLiveInfo(data);
+                }
+            } catch (error) {
+                // Silencieux pour Ã©viter de spammer les erreurs
+            }
+        }
+        
+        async function loadFromESP() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('configForm').style.display = 'none';
+                
+                const response = await fetch(`http://${ESP_IP}/json`);
+                if (!response.ok) {
+                    throw new Error('Impossible de contacter l\'ESP8266');
+                }
+                
+                const data = await response.json();
+                
+                // Mettre Ã  jour les infos en temps rÃ©el
+                updateLiveInfo(data);
+                
+                // Extraire les valeurs depuis les Dummy Devices
+                if (data.Sensors && data.Sensors.length > 0) {
+                    for (let sensor of data.Sensors) {
+                        if (sensor.TaskValues && sensor.TaskValues.length > 0) {
+                            // Device Cheptel
+                            if (sensor.TaskName === 'Cheptel') {
+                                for (let val of sensor.TaskValues) {
+                                    if (val.Name === 'NP') document.getElementById('np').value = val.Value;
+                                    if (val.Name === 'COEF_PREM') document.getElementById('coeffPrem').value = val.Value;
+                                }
+                            }
+                            // Device Distribution
+                            if (sensor.TaskName === 'Distribution') {
+                                for (let val of sensor.TaskValues) {
+                                    if (val.Name === 'HEURE_PREM') document.getElementById('heurePrem').value = val.Value;
+                                    if (val.Name === 'HEURE_DER') document.getElementById('heureDer').value = val.Value;
+                                    if (val.Name === 'TP_DIST') document.getElementById('tpDist').value = val.Value;
+                                    if (val.Name === 'NB_DIST') document.getElementById('nbDist').value = val.Value;
+                                }
+                            }
+                            // Device Temperature_Ctrl
+                            if (sensor.TaskName === 'Temperature_Ctrl') {
+                                for (let val of sensor.TaskValues) {
+                                    if (val.Name === 'CONSIGNE') document.getElementById('consigne').value = val.Value;
+                                    if (val.Name === 'DELTA') document.getElementById('delta').value = val.Value;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                updateCalculations();
+                showSuccess('ParamÃ¨tres chargÃ©s depuis l\'ESP8266');
+                
+            } catch (error) {
+                showError('Erreur lors du chargement: ' + error.message);
+                resetDefaults();
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('configForm').style.display = 'block';
+            }
+        }
+        
+        async function saveToESP() {
+            try {
+                // Sauvegarder vers les Dummy Devices avec TaskValueSet
+                const params = [
+                    {task: 2, index: 1, id: 'np', name: 'NP'},              
+                    {task: 2, index: 2, id: 'coeffPrem', name: 'COEF_PREM'},      
+                    {task: 3, index: 1, id: 'heurePrem', name: 'HEURE_PREM'},      
+                    {task: 3, index: 2, id: 'heureDer', name: 'HEURE_DER'},       
+                    {task: 3, index: 3, id: 'tpDist', name: 'TP_DIST'},         
+                    {task: 3, index: 4, id: 'nbDist', name: 'NB_DIST'},         
+                    {task: 4, index: 1, id: 'consigne', name: 'CONSIGNE'},       
+                    {task: 4, index: 2, id: 'delta', name: 'DELTA'}           
+                ];
+                
+                let errors = [];
+                let success = 0;
+                
+                for (let param of params) {
+                    const value = document.getElementById(param.id).value;
+                    const url = `http://${ESP_IP}/control?cmd=TaskValueSet,${param.task},${param.index},${value}`;
+                    
+                    console.log(`Tentative: ${param.name} = ${value} via ${url}`);
+                    
+                    try {
+                        const response = await fetch(url);
+                        const text = await response.text();
+                        console.log(`RÃ©ponse pour ${param.name}:`, text);
+                        
+                        if (response.ok) {
+                            success++;
+                        } else {
+                            errors.push(`${param.name}: ${response.status}`);
+                        }
+                    } catch (err) {
+                        errors.push(`${param.name}: ${err.message}`);
+                        console.error(`Erreur ${param.name}:`, err);
+                    }
+                    
+                    // Petite pause entre les commandes
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                if (errors.length > 0) {
+                    showError(`${success} paramÃ¨tres sauvegardÃ©s, ${errors.length} erreurs. VÃ©rifiez la console (F12)`);
+                } else {
+                    showSuccess(`Tous les paramÃ¨tres sauvegardÃ©s (${success}/8)`);
+                }
+                
+            } catch (error) {
+                showError('Erreur lors de la sauvegarde: ' + error.message);
+                console.error('Erreur complÃ¨te:', error);
+            }
+        }
+        
+        function resetDefaults() {
+            // Charger les valeurs par dÃ©faut
+            for (const [param, value] of Object.entries(defaults)) {
+                document.getElementById(param).value = value;
+            }
+            updateCalculations();
+            showSuccess('Valeurs par dÃ©faut restaurÃ©es');
+        }
+        
+        async function testRelay(gpio, state) {
+            try {
+                // Inverser la logique pour carte ACTIVE LOW
+                const invertedState = state === 1 ? 0 : 1;
+                const url = `http://${ESP_IP}/control?cmd=GPIO,${gpio},${invertedState}`;
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Erreur communication ESP32');
+                }
+                showSuccess(`Relais GPIO${gpio} ${state ? 'activÃ©' : 'dÃ©sactivÃ©'} (commande: ${invertedState})`);
+            } catch (error) {
+                showError('Erreur test relais: ' + error.message);
+            }
+        }
+        
+        async function testDistribution() {
+            try {
+                showSuccess('Test distribution 5 secondes en cours...');
+                const response = await fetch(`http://${ESP_IP}/control?cmd=event,test_distribution`);
+                if (!response.ok) {
+                    throw new Error('Erreur communication ESP32');
+                }
+            } catch (error) {
+                showError('Erreur test distribution: ' + error.message);
+            }
+        }
+        
+        async function testChauffage() {
+            try {
+                showSuccess('Test chauffage 10 secondes en cours...');
+                const response = await fetch(`http://${ESP_IP}/control?cmd=event,test_chauffage`);
+                if (!response.ok) {
+                    throw new Error('Erreur communication ESP32');
+                }
+            } catch (error) {
+                showError('Erreur test chauffage: ' + error.message);
+            }
+        }
+        
+        // Charger automatiquement au dÃ©marrage
+        loadFromESP();
     </script>
 </body>
 </html>
